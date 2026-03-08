@@ -95,16 +95,22 @@ CREATE TABLE sales_data (
 DATA_SOURCE=supabase
 SUPABASE_URL=your_project_url
 SUPABASE_ANON_KEY=your_anon_key
+NEXT_PUBLIC_GEMINI_API_KEY="your_api_key_here"
 ```
 6. Restart your development server. The API will now serve data directly from Supabase!
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [React 19](https://react.dev/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Framework**: [Next.js App Router](https://nextjs.org/)
+- **Frontend**: [React 19](https://react.dev/)
 - **Styling**: [Tailwind CSS v4.0](https://tailwindcss.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Data Parsing**: [PapaParse](https://www.papaparse.com/)
+
+## 🚀 Deployment (Vercel)
+
+This application is configured for one-click deployment to **Vercel**. 
+Please see the detailed deployment instructions in `production.md` located in this repository!
 
 ## 📝 License
 
