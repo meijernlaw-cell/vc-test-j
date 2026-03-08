@@ -28,7 +28,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell, PieChart, Pie, Legend
 } from 'recharts';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
 
 const COLORS = ['#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
@@ -188,48 +188,24 @@ const App = () => {
   }, [filteredData]);
 
   const generateAIInsights = async () => {
-    const envApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!envApiKey) {
-      alert("API Key missing. Please configure NEXT_PUBLIC_GEMINI_API_KEY in your .env file and restart the development server.");
-      return;
-    }
-    
     setAiLoading(true);
     try {
-      const genAI = new GoogleGenerativeAI(envApiKey);
-      const model = genAI.getGenerativeModel({ model: aiModel });
+      const response = await fetch('/api/insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stats, aiModel }),
+      });
 
-      const prompt = `
-        As a senior business analyst, analyze these e-commerce metrics for jenny's dashboard:
-        
-        TOTALS:
-        - Revenue: ${formatCurrency(stats.totalRevenue)}
-        - Profit: ${formatCurrency(stats.totalProfit)}
-        - Orders: ${stats.totalOrders}
-        - AOV: ${formatCurrency(stats.aov)}
-        
-        PERFORMANCE:
-        - Best Product: ${stats.bestProduct}
-        - Best Channel: ${stats.bestChannel}
-        - Peak Day: ${stats.peakDay}
-        - Highest CVR Channel: ${stats.bestCVRChannel} (${stats.bestCVR}%)
-        
-        Please provide business insights in JSON format with exactly these three keys:
-        "alerts": [list of 3 short alerts about immediate concerns or spikes]
-        "opportunities": [list of 3 short potential growth areas]
-        "suggestions": [list of 3 short tactical actions to take]
-        
-        KEEP ALL POINTS SHORT AND CLEAR (max 10 words each). Only return the raw JSON object.
-      `;
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Server error');
+      }
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      // Clean potential markdown if model wraps it
-      const cleanJson = text.replace(/```json|```/gi, "").trim();
-      setAiInsights(JSON.parse(cleanJson));
+      const insights = await response.json();
+      setAiInsights(insights);
     } catch (error) {
       console.error("AI Generation Error:", error);
-      alert("Failed to generate insights. Check your API key and connection.");
+      alert(`Failed to generate insights: ${error.message}`);
     } finally {
       setAiLoading(false);
     }
